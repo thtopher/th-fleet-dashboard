@@ -1,0 +1,20 @@
+# Staging file for Phase β Gate 2
+# Will be installed to ~/.config/systemd/user/openclaw-gateway@.service on GCP VM
+
+[Unit]
+Description=OpenClaw gateway (%i)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/%i
+ExecStart=/usr/bin/openclaw gateway
+Restart=always
+RestartSec=5s
+StandardOutput=append:%h/%i/.openclaw/logs/gateway.log
+StandardError=append:%h/%i/.openclaw/logs/gateway.err
+EnvironmentFile=-%h/%i/.openclaw/env
+
+[Install]
+WantedBy=default.target

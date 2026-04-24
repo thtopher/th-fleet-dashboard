@@ -25,17 +25,13 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.HOSTINGER_SSH_KEY }}
 
-      - name: Add Hostinger to known_hosts
-        run: |
-          mkdir -p ~/.ssh
-          ssh-keyscan -H ${{ secrets.HOSTINGER_HOST }} >> ~/.ssh/known_hosts
-
-      - name: Run restart (stub)
+      - name: Run restart
         id: run
         run: |
           START=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
           set +e
-          OUTPUT=$(ssh ${{ secrets.HOSTINGER_USER }}@${{ secrets.HOSTINGER_HOST }} \
+          OUTPUT=$(ssh -o StrictHostKeyChecking=accept-new -o ConnectTimeout=30 \
+            ${{ secrets.HOSTINGER_USER }}@${{ secrets.HOSTINGER_HOST }} \
             "bash /home/david/th-fleet-dashboard/scripts/restart-cheryl-gateway.sh" 2>&1)
           EXIT=$?
           set -e
@@ -54,21 +50,26 @@ jobs:
       - name: Append to history
         if: always()
         run: |
+          EXIT_CODE="${{ steps.run.outputs.exit_code }}"
+          [ -z "$EXIT_CODE" ] && EXIT_CODE=1
+          OUTPUT="${{ steps.run.outputs.output }}"
+          [ -z "$OUTPUT" ] && OUTPUT="Step did not run or failed early"
           jq -n \
             --arg type "action" \
             --arg t "$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
             --arg action "restart-cheryl-gateway" \
             --arg actor "${{ github.actor }}" \
             --arg run_id "${{ github.run_id }}" \
-            --argjson exit_code "${{ steps.run.outputs.exit_code }}" \
-            --arg stderr "${{ steps.run.outputs.output }}" \
+            --argjson exit_code "$EXIT_CODE" \
+            --arg stderr "$OUTPUT" \
             '{type:$type, timestamp:$t, action:$action, actor:$actor, workflow_run_id:$run_id, exit_code:$exit_code, output:$stderr}' \
             -c >> docs/history.jsonl
           git config user.name "gh-actions"
           git config user.email "actions@thirdhorizon.local"
+          git pull --rebase origin master || true
           git add docs/history.jsonl
           git commit -m "action $(date -u +%FT%TZ) restart-cheryl-gateway" || true
-          git push || true
+          git push || git push --force-with-lease || true
 
       - name: Notify Discord
         if: always()
@@ -76,9 +77,13 @@ jobs:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_OPS_WEBHOOK }}
         run: |
           STATUS="${{ steps.run.outputs.exit_code }}"
-          ICON="❌"; RESULT="failed (exit $STATUS) — not-deployed-yet"
+          ICON="✅"; RESULT="succeeded"
+          if [ "$STATUS" != "0" ]; then
+            ICON="❌"
+            RESULT="failed (exit $STATUS)"
+          fi
           if [ -n "$DISCORD_WEBHOOK" ]; then
             curl -s -X POST "$DISCORD_WEBHOOK" \
               -H "Content-Type: application/json" \
-              -d "{\"content\":\"$ICON restart-cheryl-gateway $RESULT — actor ${{ github.actor }}\"}"
+              -d "{\"content\":\"$ICON restart-cheryl-gateway $RESULT — actor ${{ github.actor }} — run ${{ github.run_id }}\"}"
           fi

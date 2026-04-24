@@ -98,6 +98,65 @@ probe_gateway() {
     }'
 }
 
+# Probe a systemd-managed gateway (PID provided directly)
+probe_gateway_systemd() {
+  local key="$1"
+  local ssh_host="$2"
+  local pid="$3"
+  local log_path="$4"
+
+  local ssh_cmd=""
+  if [ -n "$ssh_host" ]; then
+    ssh_cmd="ssh -o StrictHostKeyChecking=accept-new -o ConnectTimeout=10 $ssh_host"
+  fi
+
+  # Verify PID is still alive
+  if ! $ssh_cmd "kill -0 $pid" 2>/dev/null; then
+    jq -n --arg t "$TIMESTAMP" \
+      '{status:"down", pid:null, discord_connected:false, last_message_at:null, last_checked_at:$t, last_red_event_at:$t, details:"PID not running"}'
+    return
+  fi
+
+  # Get last ~200 lines of log (handle binary nulls)
+  local log_tail
+  log_tail=$($ssh_cmd "cat '$log_path' 2>/dev/null | tr -d '\\0' | tail -n 200" 2>/dev/null || echo "")
+
+  local discord_connected=true
+  
+  # Check for recent disconnect without reconnect
+  if echo "$log_tail" | tail -5 | grep -qE "Gateway websocket closed|disconnected" && \
+     ! echo "$log_tail" | tail -5 | grep -qE "logged in|initialized|reconnect"; then
+    discord_connected=false
+  fi
+
+  # Get the timestamp of the most recent log line
+  local last_msg
+  last_msg=$(echo "$log_tail" | grep -oE '^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}' | tail -n1 || true)
+
+  # Determine status
+  local status="up"
+  if [ "$discord_connected" = false ]; then
+    status="degraded"
+  fi
+
+  # Build JSON output
+  jq -n \
+    --arg s "$status" \
+    --arg t "$TIMESTAMP" \
+    --arg lm "${last_msg:-}" \
+    --argjson pid "$pid" \
+    --argjson dc "$discord_connected" \
+    '{
+      status: $s,
+      pid: $pid,
+      discord_connected: $dc,
+      last_message_at: (if $lm == "" then null else ($lm + "Z") end),
+      last_checked_at: $t,
+      last_red_event_at: null,
+      details: null
+    }'
+}
+
 # 3. Stub for not-deployed gateways
 stub_not_deployed() {
   local details="$1"
@@ -110,8 +169,17 @@ stub_not_deployed() {
 GCP_SSH="david_e_smith8@100.102.232.23"
 TOPHER_WINNICOT=$(probe_gateway "topher-winnicot" "$GCP_SSH" "openclaw-gateway" "/tmp/topher-gateway.log")
 
-# Cheryl and Bo are not deployed yet
-CHERYL_SWITTERS=$(stub_not_deployed "Config exists; gateway not started. See Phase β plan.")
+# Cheryl/Switters on GCP VM (systemd)
+# Use systemctl to get the PID reliably
+CHERYL_PID=$(ssh -o StrictHostKeyChecking=accept-new -o ConnectTimeout=10 "$GCP_SSH" \
+  "systemctl --user show openclaw-gateway@cheryl --property=MainPID --value 2>/dev/null" || echo "0")
+if [ "$CHERYL_PID" != "0" ] && [ -n "$CHERYL_PID" ]; then
+  CHERYL_SWITTERS=$(probe_gateway_systemd "cheryl-switters" "$GCP_SSH" "$CHERYL_PID" "/home/david_e_smith8/cheryl/.openclaw/logs/gateway.log")
+else
+  CHERYL_SWITTERS=$(jq -n --arg t "$TIMESTAMP" '{status:"down", pid:null, discord_connected:false, last_message_at:null, last_checked_at:$t, last_red_event_at:$t, details:"Systemd unit not running"}')
+fi
+
+# Bo is not deployed yet
 BO_SKYWALKER=$(stub_not_deployed "Old-format config. See Phase β plan.")
 
 # 5. Build status.json
@@ -131,7 +199,7 @@ jq -n \
     },
     actions: [
       {name:"restart-topher-gateway", target:"topher-winnicot", workflow_url:"https://github.com/thtopher/th-fleet-dashboard/actions/workflows/restart-topher-gateway.yml", enabled:true},
-      {name:"restart-cheryl-gateway", target:"cheryl-switters", workflow_url:"https://github.com/thtopher/th-fleet-dashboard/actions/workflows/restart-cheryl-gateway.yml", enabled:false},
+      {name:"restart-cheryl-gateway", target:"cheryl-switters", workflow_url:"https://github.com/thtopher/th-fleet-dashboard/actions/workflows/restart-cheryl-gateway.yml", enabled:true},
       {name:"restart-bo-gateway", target:"bo-skywalker", workflow_url:"https://github.com/thtopher/th-fleet-dashboard/actions/workflows/restart-bo-gateway.yml", enabled:false}
     ]
   }' > docs/status.json.tmp
