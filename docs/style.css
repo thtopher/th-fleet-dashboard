@@ -47,9 +47,12 @@ header h1 {
   padding: 1rem;
   border-radius: 6px;
   margin-bottom: 1.5rem;
-  display: flex;
   align-items: center;
   gap: 0.75rem;
+}
+
+#stale-banner:not([hidden]) {
+  display: flex;
 }
 
 #stale-banner .icon {
