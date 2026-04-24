@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>TH Fleet Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>Third Horizon Fleet</h1>
+    <p id="last-updated">Loading...</p>
+  </header>
+  <div id="stale-banner" hidden>
+    <span class="icon">⚠️</span>
+    <span id="stale-message"></span>
+  </div>
+  <main>
+    <table id="fleet-table">
+      <thead>
+        <tr>
+          <th>Gateway</th>
+          <th>Status</th>
+          <th>Last Checked</th>
+          <th>Detail</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="fleet-body">
+        <!-- Populated by app.js -->
+      </tbody>
+    </table>
+  </main>
+  <footer>
+    <p>Maintained by Hermes (CDRO) · <a href="https://github.com/thtopher/th-fleet-dashboard">Source</a></p>
+  </footer>
+  <script src="app.js"></script>
+</body>
+</html>

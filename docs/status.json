@@ -1,0 +1,45 @@
+{
+  "updated_at": "2026-04-24T16:00:00Z",
+  "poll_interval_seconds": 60,
+  "gateways": {
+    "topher-winnicot": {
+      "status": "up",
+      "pid": 256152,
+      "discord_connected": true,
+      "last_message_at": "2026-04-24T15:58:00Z",
+      "last_checked_at": "2026-04-24T16:00:00Z",
+      "last_red_event_at": null,
+      "details": null
+    },
+    "cheryl-switters": {
+      "status": "not-deployed",
+      "last_checked_at": "2026-04-24T16:00:00Z",
+      "details": "Config exists; gateway not started. See Phase β plan."
+    },
+    "bo-skywalker": {
+      "status": "not-deployed",
+      "last_checked_at": "2026-04-24T16:00:00Z",
+      "details": "Old-format config. See Phase β plan."
+    }
+  },
+  "actions": [
+    {
+      "name": "restart-topher-gateway",
+      "target": "topher-winnicot",
+      "workflow_url": "https://github.com/thtopher/th-fleet-dashboard/actions/workflows/restart-topher-gateway.yml",
+      "enabled": true
+    },
+    {
+      "name": "restart-cheryl-gateway",
+      "target": "cheryl-switters",
+      "workflow_url": "https://github.com/thtopher/th-fleet-dashboard/actions/workflows/restart-cheryl-gateway.yml",
+      "enabled": false
+    },
+    {
+      "name": "restart-bo-gateway",
+      "target": "bo-skywalker",
+      "workflow_url": "https://github.com/thtopher/th-fleet-dashboard/actions/workflows/restart-bo-gateway.yml",
+      "enabled": false
+    }
+  ]
+}
