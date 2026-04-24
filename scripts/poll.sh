@@ -165,9 +165,15 @@ stub_not_deployed() {
 }
 
 # 4. Probe each gateway
-# Topher/Winnicot on GCP VM
+# Topher/Winnicot on GCP VM (systemd - Phase γ)
 GCP_SSH="david_e_smith8@100.102.232.23"
-TOPHER_WINNICOT=$(probe_gateway "topher-winnicot" "$GCP_SSH" "openclaw-gateway" "/tmp/topher-gateway.log")
+TOPHER_PID=$(ssh -o StrictHostKeyChecking=accept-new -o ConnectTimeout=10 "$GCP_SSH" \
+  "systemctl --user show openclaw-gateway@topher --property=MainPID --value 2>/dev/null" || echo "0")
+if [ "$TOPHER_PID" != "0" ] && [ -n "$TOPHER_PID" ]; then
+  TOPHER_WINNICOT=$(probe_gateway_systemd "topher-winnicot" "$GCP_SSH" "$TOPHER_PID" "/home/david_e_smith8/topher/.openclaw/logs/gateway.log")
+else
+  TOPHER_WINNICOT=$(jq -n --arg t "$TIMESTAMP" '{status:"down", pid:null, discord_connected:false, last_message_at:null, last_checked_at:$t, last_red_event_at:$t, details:"Systemd unit not running"}')
+fi
 
 # Cheryl/Switters on GCP VM (systemd)
 # Use systemctl to get the PID reliably
