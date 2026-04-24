@@ -66,9 +66,10 @@ jobs:
             -c >> docs/history.jsonl
           git config user.name "gh-actions"
           git config user.email "actions@thirdhorizon.local"
+          git pull --rebase origin master || true
           git add docs/history.jsonl
           git commit -m "action $(date -u +%FT%TZ) restart-topher-gateway" || true
-          git push || true
+          git push || git push --force-with-lease || true
 
       - name: Notify Discord
         if: always()
