@@ -25,17 +25,13 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.HOSTINGER_SSH_KEY }}
 
-      - name: Add Hostinger to known_hosts
-        run: |
-          mkdir -p ~/.ssh
-          ssh-keyscan -H ${{ secrets.HOSTINGER_HOST }} >> ~/.ssh/known_hosts
-
       - name: Run restart
         id: run
         run: |
           START=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
           set +e
-          OUTPUT=$(ssh ${{ secrets.HOSTINGER_USER }}@${{ secrets.HOSTINGER_HOST }} \
+          OUTPUT=$(ssh -o StrictHostKeyChecking=accept-new -o ConnectTimeout=30 \
+            ${{ secrets.HOSTINGER_USER }}@${{ secrets.HOSTINGER_HOST }} \
             "bash /home/david/th-fleet-dashboard/scripts/restart-topher-gateway.sh" 2>&1)
           EXIT=$?
           set -e
@@ -54,14 +50,18 @@ jobs:
       - name: Append to history
         if: always()
         run: |
+          EXIT_CODE="${{ steps.run.outputs.exit_code }}"
+          [ -z "$EXIT_CODE" ] && EXIT_CODE=1
+          OUTPUT="${{ steps.run.outputs.output }}"
+          [ -z "$OUTPUT" ] && OUTPUT="Step did not run or failed early"
           jq -n \
             --arg type "action" \
             --arg t "$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
             --arg action "restart-topher-gateway" \
             --arg actor "${{ github.actor }}" \
             --arg run_id "${{ github.run_id }}" \
-            --argjson exit_code "${{ steps.run.outputs.exit_code }}" \
-            --arg stderr "${{ steps.run.outputs.output }}" \
+            --argjson exit_code "$EXIT_CODE" \
+            --arg stderr "$OUTPUT" \
             '{type:$type, timestamp:$t, action:$action, actor:$actor, workflow_run_id:$run_id, exit_code:$exit_code, output:$stderr}' \
             -c >> docs/history.jsonl
           git config user.name "gh-actions"
