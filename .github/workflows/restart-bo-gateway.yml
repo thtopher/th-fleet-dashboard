@@ -1,0 +1,84 @@
+name: restart-bo-gateway
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: "Type RESTART to confirm"
+        required: true
+        default: ""
+
+permissions:
+  contents: write
+
+jobs:
+  restart:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    if: ${{ github.event.inputs.confirm == 'RESTART' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.HOSTINGER_SSH_KEY }}
+
+      - name: Add Hostinger to known_hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H ${{ secrets.HOSTINGER_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Run restart (stub)
+        id: run
+        run: |
+          START=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          set +e
+          OUTPUT=$(ssh ${{ secrets.HOSTINGER_USER }}@${{ secrets.HOSTINGER_HOST }} \
+            "bash /home/david/th-fleet-dashboard/scripts/restart-bo-gateway.sh" 2>&1)
+          EXIT=$?
+          set -e
+          END=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          echo "exit_code=$EXIT" >> $GITHUB_OUTPUT
+          echo "start=$START" >> $GITHUB_OUTPUT
+          echo "end=$END" >> $GITHUB_OUTPUT
+          {
+            echo "output<<EOF"
+            echo "$OUTPUT"
+            echo "EOF"
+          } >> $GITHUB_OUTPUT
+          echo "$OUTPUT"
+          exit $EXIT
+
+      - name: Append to history
+        if: always()
+        run: |
+          jq -n \
+            --arg type "action" \
+            --arg t "$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
+            --arg action "restart-bo-gateway" \
+            --arg actor "${{ github.actor }}" \
+            --arg run_id "${{ github.run_id }}" \
+            --argjson exit_code "${{ steps.run.outputs.exit_code }}" \
+            --arg stderr "${{ steps.run.outputs.output }}" \
+            '{type:$type, timestamp:$t, action:$action, actor:$actor, workflow_run_id:$run_id, exit_code:$exit_code, output:$stderr}' \
+            -c >> docs/history.jsonl
+          git config user.name "gh-actions"
+          git config user.email "actions@thirdhorizon.local"
+          git add docs/history.jsonl
+          git commit -m "action $(date -u +%FT%TZ) restart-bo-gateway" || true
+          git push || true
+
+      - name: Notify Discord
+        if: always()
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_OPS_WEBHOOK }}
+        run: |
+          STATUS="${{ steps.run.outputs.exit_code }}"
+          ICON="❌"; RESULT="failed (exit $STATUS) — not-deployed-yet"
+          if [ -n "$DISCORD_WEBHOOK" ]; then
+            curl -s -X POST "$DISCORD_WEBHOOK" \
+              -H "Content-Type: application/json" \
+              -d "{\"content\":\"$ICON restart-bo-gateway $RESULT — actor ${{ github.actor }}\"}"
+          fi
