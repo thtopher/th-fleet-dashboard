@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-04-24T19:10:01Z",
+  "updated_at": "2026-04-24T19:11:01Z",
   "poll_interval_seconds": 60,
   "gateways": {
     "topher-winnicot": {
@@ -7,22 +7,22 @@
       "pid": 345007,
       "discord_connected": true,
       "last_message_at": "2026-04-24T19:02:51Z",
-      "last_checked_at": "2026-04-24T19:10:01Z",
+      "last_checked_at": "2026-04-24T19:11:01Z",
       "last_red_event_at": null,
       "details": null
     },
     "cheryl-switters": {
-      "status": "up",
-      "pid": 339071,
-      "discord_connected": true,
-      "last_message_at": "2026-04-24T18:47:23Z",
-      "last_checked_at": "2026-04-24T19:10:01Z",
-      "last_red_event_at": null,
-      "details": null
+      "status": "down",
+      "pid": null,
+      "discord_connected": false,
+      "last_message_at": null,
+      "last_checked_at": "2026-04-24T19:11:01Z",
+      "last_red_event_at": "2026-04-24T19:11:01Z",
+      "details": "Systemd unit not running"
     },
     "bo-skywalker": {
       "status": "not-deployed",
-      "last_checked_at": "2026-04-24T19:10:01Z",
+      "last_checked_at": "2026-04-24T19:11:01Z",
       "details": "Old-format config. See Phase β plan."
     }
   },
