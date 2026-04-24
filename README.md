@@ -153,9 +153,9 @@ systemctl --user enable --now openclaw-gateway@bo
 
 ## Known Gaps
 
-1. **Topher still under screen.** Phase γ will retrofit Topher to systemd.
+1. ~~**Topher still under screen.**~~ ✅ **Phase γ complete** — All three gateways under systemd.
 
-2. **~35min health monitor restarts.** Topher self-restarts every ~35min due to OpenClaw's internal health monitor. Phase δ addresses this.
+2. ~~**~35min health monitor restarts.**~~ ✅ **Phase δ complete** — Root cause identified (`gateway.channelStaleEventThresholdMinutes` default 30min). Fixed by setting to 120min on all gateways.
 
 3. **Bo not activated.** Config staged but awaiting Discord credentials from David.
 
