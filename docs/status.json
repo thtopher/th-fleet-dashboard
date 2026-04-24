@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-04-24T16:54:01Z",
+  "updated_at": "2026-04-24T16:55:01Z",
   "poll_interval_seconds": 60,
   "gateways": {
     "topher-winnicot": {
@@ -7,18 +7,18 @@
       "pid": 256152,
       "discord_connected": true,
       "last_message_at": "2026-04-24T16:49:18Z",
-      "last_checked_at": "2026-04-24T16:54:01Z",
+      "last_checked_at": "2026-04-24T16:55:01Z",
       "last_red_event_at": null,
       "details": null
     },
     "cheryl-switters": {
       "status": "not-deployed",
-      "last_checked_at": "2026-04-24T16:54:01Z",
+      "last_checked_at": "2026-04-24T16:55:01Z",
       "details": "Config exists; gateway not started. See Phase β plan."
     },
     "bo-skywalker": {
       "status": "not-deployed",
-      "last_checked_at": "2026-04-24T16:54:01Z",
+      "last_checked_at": "2026-04-24T16:55:01Z",
       "details": "Old-format config. See Phase β plan."
     }
   },
