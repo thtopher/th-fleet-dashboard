@@ -1,13 +1,13 @@
 {
-  "updated_at": "2026-04-28T03:59:01Z",
-  "poll_interval_seconds": 60,
+  "updated_at": "2026-04-28T04:00:02Z",
+  "poll_interval_seconds": 300,
   "gateways": {
     "topher-winnicot": {
       "status": "up",
       "pid": 381394,
       "discord_connected": true,
       "last_message_at": "2026-04-28T03:53:31Z",
-      "last_checked_at": "2026-04-28T03:59:01Z",
+      "last_checked_at": "2026-04-28T04:00:02Z",
       "last_red_event_at": null,
       "details": null
     },
@@ -16,13 +16,13 @@
       "pid": 901983,
       "discord_connected": true,
       "last_message_at": "2026-04-28T03:53:52Z",
-      "last_checked_at": "2026-04-28T03:59:01Z",
+      "last_checked_at": "2026-04-28T04:00:02Z",
       "last_red_event_at": null,
       "details": null
     },
     "bo-skywalker": {
       "status": "not-deployed",
-      "last_checked_at": "2026-04-28T03:59:01Z",
+      "last_checked_at": "2026-04-28T04:00:02Z",
       "details": "Old-format config. See Phase β plan."
     }
   },
