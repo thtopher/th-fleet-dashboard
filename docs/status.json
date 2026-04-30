@@ -1,28 +1,28 @@
 {
-  "updated_at": "2026-04-30T15:58:01Z",
+  "updated_at": "2026-04-30T15:59:01Z",
   "poll_interval_seconds": 60,
   "gateways": {
     "topher-winnicot": {
       "status": "up",
-      "pid": 381394,
+      "pid": 2444837,
       "discord_connected": true,
-      "last_message_at": "2026-04-30T15:03:56Z",
-      "last_checked_at": "2026-04-30T15:58:01Z",
+      "last_message_at": "2026-04-30T15:59:03Z",
+      "last_checked_at": "2026-04-30T15:59:01Z",
       "last_red_event_at": null,
       "details": null
     },
     "cheryl-switters": {
       "status": "up",
-      "pid": 2358881,
+      "pid": 2444845,
       "discord_connected": true,
-      "last_message_at": "2026-04-30T14:40:37Z",
-      "last_checked_at": "2026-04-30T15:58:01Z",
+      "last_message_at": "2026-04-30T15:58:47Z",
+      "last_checked_at": "2026-04-30T15:59:01Z",
       "last_red_event_at": null,
       "details": null
     },
     "bo-skywalker": {
       "status": "not-deployed",
-      "last_checked_at": "2026-04-30T15:58:01Z",
+      "last_checked_at": "2026-04-30T15:59:01Z",
       "details": "Old-format config. See Phase β plan."
     }
   },
