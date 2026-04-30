@@ -1,13 +1,13 @@
 {
-  "updated_at": "2026-04-30T03:28:01Z",
+  "updated_at": "2026-04-30T03:29:01Z",
   "poll_interval_seconds": 60,
   "gateways": {
     "topher-winnicot": {
       "status": "up",
       "pid": 381394,
       "discord_connected": true,
-      "last_message_at": "2026-04-30T03:23:36Z",
-      "last_checked_at": "2026-04-30T03:28:01Z",
+      "last_message_at": "2026-04-30T03:28:17Z",
+      "last_checked_at": "2026-04-30T03:29:01Z",
       "last_red_event_at": null,
       "details": null
     },
@@ -15,14 +15,14 @@
       "status": "up",
       "pid": 901983,
       "discord_connected": true,
-      "last_message_at": "2026-04-30T03:23:44Z",
-      "last_checked_at": "2026-04-30T03:28:01Z",
+      "last_message_at": "2026-04-30T03:28:30Z",
+      "last_checked_at": "2026-04-30T03:29:01Z",
       "last_red_event_at": null,
       "details": null
     },
     "bo-skywalker": {
       "status": "not-deployed",
-      "last_checked_at": "2026-04-30T03:28:01Z",
+      "last_checked_at": "2026-04-30T03:29:01Z",
       "details": "Old-format config. See Phase β plan."
     }
   },
